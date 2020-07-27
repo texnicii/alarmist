@@ -1,0 +1,15 @@
+{
+    "require": {
+        "php-http/guzzle6-adapter": "^2.0",
+        "http-interop/http-factory-guzzle": "^1.0",
+        "tg-bot-api/bot-api-base": "^1.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Alarmist\\": "src/"
+        },
+        "files": [
+            "src/func.php"
+        ]
+    }
+}
