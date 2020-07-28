@@ -13,12 +13,14 @@ class Bot
 {
 	public $api;
 	private $offset_storage;
+	private $command_register;
 
 	public function __construct(string $botKey, string $storage)
 	{
 		$apiClient = new ApiClient(new RequestFactory(), new StreamFactory(), new GuzzleClient());
 		$this->api = new BotApi($botKey, $apiClient, new BotApiNormalizer());
 		$this->offset_storage = $storage . '/offset';
+		$this->command_register = include __DIR__ . '/commandRegister.inc.php';
 	}
 	/**
 	 * Send message to user
@@ -55,25 +57,26 @@ class Bot
 
 		foreach ($updates as $i => $data) {
 			$f = $this->offset_storage . '/' . $data->updateId;
-			if (file_exists($f)){
+			if (file_exists($f)) {
 				unset($updates[$i]);
 				continue;
-			}else touch($f);
+			} else touch($f);
 		}
 
 		return $updates;
 	}
 
-	public static function hasCommands(\TgBotApi\BotApiBase\Type\MessageType $message){
-		$commands=[];
+	public static function hasCommands(\TgBotApi\BotApiBase\Type\MessageType $message)
+	{
+		$commands = [];
 
-		if(isset($message->entities)){
+		if (isset($message->entities)) {
 			foreach ($message->entities as $ent) {
-				if($ent->type!='bot_command') continue;
-				$commands[]=trim(mb_substr($message->text, $ent->offset+1, $ent->length));
-			}	
+				if ($ent->type != 'bot_command') continue;
+				$commands[] = trim(mb_substr($message->text, $ent->offset + 1, $ent->length));
+			}
 		}
-		
+
 		return $commands;
 	}
 
@@ -86,5 +89,16 @@ class Bot
 			if ((filectime($path) + 172800) < time()) unlink($path);
 		}
 		closedir($dh);
+	}
+
+	public function execCommand(string $command, \TgBotApi\BotApiBase\Type\ChatType $chat)
+	{
+		if (isset($this->command_register[$command])) {
+			$commandClass = __NAMESPACE__ . '\\' . $this->command_register[$command];
+			$C=new $commandClass;
+			if($reply=$C->exec()){
+				$this->send($chat->id, $reply);
+			}
+		}
 	}
 }
