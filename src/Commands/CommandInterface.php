@@ -4,5 +4,5 @@ namespace Alarmist\Commands;
 
 interface CommandInterface
 {
-	public function exec();
+	public function exec(): ?string;
 }

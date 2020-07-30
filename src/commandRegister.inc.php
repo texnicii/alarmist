@@ -6,5 +6,5 @@ return [
 	'help' => 'Commands\\Help',
 	'add' => 'Commands\\Add',
 	'del' => 'Commands\\Del',
-	'list' => 'Commands\\IpList',
+	'list' => 'Commands\\SiteList',
 ];

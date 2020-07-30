@@ -13,7 +13,7 @@ while (1) {
 	try {
 		foreach ($bot->getLastMessages() as $update) {
 			foreach (Bot::hasCommands($update->message) as $command) {
-				$bot->execCommand($command, $update->message->chat);
+				$bot->execCommand($command, $update->message);
 			}
 		}
 		sleep(2);

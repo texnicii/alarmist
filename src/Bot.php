@@ -91,20 +91,20 @@ class Bot
 		closedir($dh);
 	}
 
-	public function execCommand(string $command, \TgBotApi\BotApiBase\Type\ChatType $chat)
+	public function execCommand(string $command, \TgBotApi\BotApiBase\Type\MessageType $message)
 	{
 		if (isset($this->command_register[$command])) {
 			$commandClass = __NAMESPACE__ . '\\' . $this->command_register[$command];
-			if(class_exists($commandClass)){
-				$C = new $commandClass;
+			if (class_exists($commandClass)) {
+				$C = new $commandClass($message);
 				if ($reply = $C->exec()) {
-					$this->send($chat->id, $reply);
+					$this->send($message->chat->id, $reply);
 				}
-			}else{
-				throw new Commands\Exeptions\commandClassCreateExeption("[chat:{$chat->id}] [command:$command] command execute error");
+			} else {
+				throw new Commands\Exeptions\commandClassCreateExeption("[chat:{$message->chat->id}] [command:$command] command execute error");
 			}
-		}else{
-			$this->send($chat->id, 'unknown command');
+		} else {
+			$this->send($message->chat->id, 'unknown command');
 		}
 	}
 }
