@@ -10,10 +10,14 @@ $bot = new Bot(BOT_KEY, STORAGE);
 
 echo "Message receiver starting...\n";
 while (1) {
-	foreach ($bot->getLastMessages() as $update) {
-		foreach (Bot::hasCommands($update->message) as $command) {
-			$bot->execCommand($command, $update->message->chat);
+	try {
+		foreach ($bot->getLastMessages() as $update) {
+			foreach (Bot::hasCommands($update->message) as $command) {
+				$bot->execCommand($command, $update->message->chat);
+			}
 		}
+		sleep(2);
+	} catch (\Throwable $th) {
+		echo $th->getMessage()."\n";
 	}
-	sleep(2);
 }

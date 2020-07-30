@@ -95,10 +95,16 @@ class Bot
 	{
 		if (isset($this->command_register[$command])) {
 			$commandClass = __NAMESPACE__ . '\\' . $this->command_register[$command];
-			$C=new $commandClass;
-			if($reply=$C->exec()){
-				$this->send($chat->id, $reply);
+			if(class_exists($commandClass)){
+				$C = new $commandClass;
+				if ($reply = $C->exec()) {
+					$this->send($chat->id, $reply);
+				}
+			}else{
+				throw new Commands\Exeptions\commandClassCreateExeption("[chat:{$chat->id}] [command:$command] command execute error");
 			}
+		}else{
+			$this->send($chat->id, 'unknown command');
 		}
 	}
 }
