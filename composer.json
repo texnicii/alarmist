@@ -7,9 +7,6 @@
     "autoload": {
         "psr-4": {
             "Alarmist\\": "src/"
-        },
-        "files": [
-            "src/func.php"
-        ]
+        }
     }
 }
