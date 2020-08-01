@@ -14,6 +14,7 @@ class Bot
 	public $api;
 	private $offset_storage;
 	private $command_register;
+	private $me;
 
 	public function __construct(string $botKey, string $storage)
 	{
@@ -23,6 +24,7 @@ class Bot
 		if (!file_exists($this->offset_storage))
 			mkdir($this->offset_storage);
 		$this->command_register = include __DIR__ . '/commandRegister.inc.php';
+		$this->me = $this->api->getMe(\TgBotApi\BotApiBase\Method\GetMeMethod::create());
 	}
 	/**
 	 * Send message to user
@@ -104,7 +106,6 @@ class Bot
 				$commands[] = trim(mb_substr($message->text, $ent->offset + 1, $ent->length));
 			}
 		}
-
 		return $commands;
 	}
 
@@ -130,6 +131,11 @@ class Bot
 	 */
 	public function execCommand(string $command, \TgBotApi\BotApiBase\Type\MessageType $message)
 	{
+		if ($message->chat->type == 'group' && strstr($command, '@')) {
+			list($c, $botName) = explode('@', $command);
+			if ($botName != $this->me->username) return;
+			$command = $c;
+		}
 		if (isset($this->command_register[$command])) {
 			$commandClass = __NAMESPACE__ . '\\' . $this->command_register[$command];
 			if (class_exists($commandClass)) {
@@ -143,5 +149,13 @@ class Bot
 		} else {
 			$this->send($message->chat->id, 'unknown command');
 		}
+	}
+
+	/**
+	 * Get the value of me
+	 */
+	public function getMe()
+	{
+		return $this->me;
 	}
 }

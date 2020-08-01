@@ -84,6 +84,8 @@ class Http implements CheckerInterface
 	 */
 	public static function siteAdd(array $newSites, int $chatId): int
 	{
+		if (!file_exists(static::SITES_STORAGE))
+			mkdir(static::SITES_STORAGE);
 		$c = 0;
 		$sites = Http::siteList($chatId);
 		foreach ($newSites as $site) {
