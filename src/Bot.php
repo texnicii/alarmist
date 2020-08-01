@@ -13,12 +13,14 @@ class Bot
 {
 	public $api;
 	private $offset_storage;
+	private $command_register;
 
 	public function __construct(string $botKey, string $storage)
 	{
 		$apiClient = new ApiClient(new RequestFactory(), new StreamFactory(), new GuzzleClient());
 		$this->api = new BotApi($botKey, $apiClient, new BotApiNormalizer());
 		$this->offset_storage = $storage . '/offset';
+		$this->command_register = include __DIR__ . '/commandRegister.inc.php';
 	}
 	/**
 	 * Send message to user
@@ -38,7 +40,7 @@ class Bot
 	{
 		foreach ($checker->run() as $chatId => $status) {
 			if ($status['status'] === false)
-				$this->send($chatId, "<b>Alarm</b> <i>" . date('Y-m-d H:i') . "</i> [{$status['ip']}] " . $checker->getName() . " fail");
+				$this->send($chatId, "<b>Alarm</b> <i>" . date('Y-m-d H:i') . "</i> [{$status['site']}] " . $checker->getName() . " fail");
 		}
 	}
 
@@ -55,25 +57,26 @@ class Bot
 
 		foreach ($updates as $i => $data) {
 			$f = $this->offset_storage . '/' . $data->updateId;
-			if (file_exists($f)){
+			if (file_exists($f)) {
 				unset($updates[$i]);
 				continue;
-			}else touch($f);
+			} else touch($f);
 		}
 
 		return $updates;
 	}
 
-	public static function hasCommands(\TgBotApi\BotApiBase\Type\MessageType $message){
-		$commands=[];
+	public static function hasCommands(\TgBotApi\BotApiBase\Type\MessageType $message)
+	{
+		$commands = [];
 
-		if(isset($message->entities)){
+		if (isset($message->entities)) {
 			foreach ($message->entities as $ent) {
-				if($ent->type!='bot_command') continue;
-				$commands[]=trim(mb_substr($message->text, $ent->offset+1, $ent->length));
-			}	
+				if ($ent->type != 'bot_command') continue;
+				$commands[] = trim(mb_substr($message->text, $ent->offset + 1, $ent->length));
+			}
 		}
-		
+
 		return $commands;
 	}
 
@@ -86,5 +89,22 @@ class Bot
 			if ((filectime($path) + 172800) < time()) unlink($path);
 		}
 		closedir($dh);
+	}
+
+	public function execCommand(string $command, \TgBotApi\BotApiBase\Type\MessageType $message)
+	{
+		if (isset($this->command_register[$command])) {
+			$commandClass = __NAMESPACE__ . '\\' . $this->command_register[$command];
+			if (class_exists($commandClass)) {
+				$C = new $commandClass($message);
+				if ($reply = $C->exec()) {
+					$this->send($message->chat->id, $reply);
+				}
+			} else {
+				throw new Commands\Exeptions\commandClassCreateExeption("[chat:{$message->chat->id}] [command:$command] command execute error");
+			}
+		} else {
+			$this->send($message->chat->id, 'unknown command');
+		}
 	}
 }

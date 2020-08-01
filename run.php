@@ -8,8 +8,16 @@ require __DIR__ . '/init.php';
 
 $bot = new Bot(BOT_KEY, STORAGE);
 
-foreach ($bot->getLastMessages() as $update) {
-	print_r(Bot::hasCommands($update->message));
+echo "Message receiver starting...\n";
+while (1) {
+	try {
+		foreach ($bot->getLastMessages() as $update) {
+			foreach (Bot::hasCommands($update->message) as $command) {
+				$bot->execCommand($command, $update->message);
+			}
+		}
+		sleep(2);
+	} catch (\Throwable $th) {
+		echo $th->getMessage()."\n";
+	}
 }
-
-#print_r($m);

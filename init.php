@@ -1,11 +1,9 @@
 <?php
-error_reporting(-1);
+error_reporting($_ENV['PHP_ERROR_REPORTING']??0);
 
-define('BOT_KEY', '');
-define('STORAGE',__DIR__.'/storage');
+define('BOT_KEY',  $_ENV['BOT_KEY']);
+define('STORAGE', __DIR__ . '/storage');
 
-if(!file_exists(STORAGE)) mkdir(STORAGE);
+if (!file_exists(STORAGE)) mkdir(STORAGE);
 
-require __DIR__.'/vendor/autoload.php';
-
-//TODO move BOT_KEY to env 
+require __DIR__ . '/vendor/autoload.php';

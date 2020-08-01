@@ -1,0 +1,11 @@
+version: "3"
+services:
+   alarmist:
+      image: alarmist:latest
+      volumes:
+         - ./:/app
+      working_dir: /app
+      build: ./
+      env_file:
+         - config.env
+      restart: 'always'
