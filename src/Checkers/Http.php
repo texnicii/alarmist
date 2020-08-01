@@ -21,7 +21,11 @@ class Http implements CheckerInterface
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		return curl_exec($ch);
 	}
-
+	/**
+	 * Run HTTP check
+	 *
+	 * @return \Generator
+	 */
 	public function run(): \Generator
 	{
 		$dh = opendir(static::SITES_STORAGE);
@@ -52,6 +56,12 @@ class Http implements CheckerInterface
 		return $this->name;
 	}
 
+	/**
+	 * Get list of sites
+	 *
+	 * @param integer $chatId
+	 * @return array
+	 */
 	public static function siteList(int $chatId): array
 	{
 		$file = static::SITES_STORAGE . '/' . $chatId;
@@ -65,6 +75,13 @@ class Http implements CheckerInterface
 		return $sites;
 	}
 
+	/**
+	 * Add site
+	 *
+	 * @param array $newSites
+	 * @param integer $chatId
+	 * @return integer
+	 */
 	public static function siteAdd(array $newSites, int $chatId): int
 	{
 		$c = 0;
@@ -80,6 +97,13 @@ class Http implements CheckerInterface
 		return $c;
 	}
 
+	/**
+	 * Remove site
+	 *
+	 * @param array $delSites
+	 * @param integer $chatId
+	 * @return integer
+	 */
 	public static function siteDel(array $delSites, int $chatId): int
 	{
 		$c = 0;
@@ -95,6 +119,12 @@ class Http implements CheckerInterface
 		return $c;
 	}
 
+	/**
+	 * Parse sites from message
+	 *
+	 * @param string $message
+	 * @return array
+	 */
 	public static function parseSites(string $message): array
 	{
 		$sites = [];
@@ -110,6 +140,12 @@ class Http implements CheckerInterface
 		return $sites;
 	}
 
+	/**
+	 * Erace all sites list
+	 *
+	 * @param integer $chatId
+	 * @return void
+	 */
 	public static function erase(int $chatId)
 	{
 		if (file_exists($file = static::SITES_STORAGE . '/' . $chatId))

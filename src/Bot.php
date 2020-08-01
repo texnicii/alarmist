@@ -20,6 +20,8 @@ class Bot
 		$apiClient = new ApiClient(new RequestFactory(), new StreamFactory(), new GuzzleClient());
 		$this->api = new BotApi($botKey, $apiClient, new BotApiNormalizer());
 		$this->offset_storage = $storage . '/offset';
+		if (!file_exists($this->offset_storage))
+			mkdir($this->offset_storage);
 		$this->command_register = include __DIR__ . '/commandRegister.inc.php';
 	}
 	/**
@@ -36,6 +38,12 @@ class Bot
 		return $this->api->send($Message);
 	}
 
+	/**
+	 * Run checker
+	 *
+	 * @param Checkers\CheckerInterface $checker
+	 * @return void
+	 */
 	public function check(Checkers\CheckerInterface $checker)
 	{
 		foreach ($checker->run() as $chatId => $status) {
@@ -66,7 +74,27 @@ class Bot
 		return $updates;
 	}
 
-	public static function hasCommands(\TgBotApi\BotApiBase\Type\MessageType $message)
+	/**
+	 * Skip messages in the queue to don't send to chats
+	 *
+	 * @return void
+	 */
+	public function skipOldMessages()
+	{
+		$updates = $this->api->getUpdates(\TgBotApi\BotApiBase\Method\GetUpdatesMethod::create());
+		foreach ($updates as $i => $data) {
+			touch($this->offset_storage . '/' . $data->updateId);
+		}
+		$this->clearOffsetExpired();
+	}
+
+	/**
+	 * Find commands into message
+	 *
+	 * @param \TgBotApi\BotApiBase\Type\MessageType $message
+	 * @return array
+	 */
+	public static function hasCommands(\TgBotApi\BotApiBase\Type\MessageType $message): array
 	{
 		$commands = [];
 
@@ -91,6 +119,15 @@ class Bot
 		closedir($dh);
 	}
 
+	/**
+	 * Exec command
+	 *
+	 * @param string $command
+	 * @param \TgBotApi\BotApiBase\Type\MessageType $message
+	 * @return void
+	 * 
+	 * @throws commandClassCreateExeption
+	 */
 	public function execCommand(string $command, \TgBotApi\BotApiBase\Type\MessageType $message)
 	{
 		if (isset($this->command_register[$command])) {
