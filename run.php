@@ -7,8 +7,8 @@ if (php_sapi_name() !== 'cli') die;
 require __DIR__ . '/init.php';
 
 $bot = new Bot(BOT_KEY, STORAGE);
-
 echo "Message receiver starting...\n";
+$bot->skipOldMessages();
 while (1) {
 	try {
 		foreach ($bot->getLastMessages() as $update) {
@@ -18,6 +18,6 @@ while (1) {
 		}
 		sleep(2);
 	} catch (\Throwable $th) {
-		echo $th->getMessage()."\n";
+		echo $th->getMessage() . "\n";
 	}
 }
