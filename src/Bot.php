@@ -40,7 +40,7 @@ class Bot
 	{
 		foreach ($checker->run() as $chatId => $status) {
 			if ($status['status'] === false)
-				$this->send($chatId, "<b>Alarm</b> <i>" . date('Y-m-d H:i') . "</i> [{$status['ip']}] " . $checker->getName() . " fail");
+				$this->send($chatId, "<b>Alarm</b> <i>" . date('Y-m-d H:i') . "</i> [{$status['site']}] " . $checker->getName() . " fail");
 		}
 	}
 
