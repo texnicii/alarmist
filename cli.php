@@ -11,5 +11,6 @@ $bot = new Bot(BOT_KEY, STORAGE);
 $opt = getopt('cm', ['cron', 'me']);
 if (isset($opt['cron']) | isset($opt['c'])) {
 	$bot->check(new HttpChecker());
-} elseif (isset($opt['me']) | isset($opt['m']))
+} elseif (isset($opt['me']) | isset($opt['m'])) {
 	print_r($bot->getMe());
+}

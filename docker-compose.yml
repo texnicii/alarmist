@@ -8,4 +8,4 @@ services:
       build: ./
       env_file:
          - config.env
-      restart: 'always'
+      restart: always
